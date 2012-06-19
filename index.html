@@ -3,7 +3,10 @@
 		<title>lolshield sequencer</title>
 		<script src="jam/require.js"></script>
 		<script>
-			require(['jquery','underscore','lss.js'],function($,_){
+			require(['jquery','underscore','lss'],function($,_,lss){
+				$(function(){
+					lss.initMarkup();
+				});
 			});</script>
 		<link rel="stylesheet" href="lss.css" ></link>
 		<!--
