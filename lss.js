@@ -1,4 +1,4 @@
-var lss = (function($, _){
+define('lss', ['jquery','underscore'], function($, _){
 	"use strict"
 
 	var numRows = 9;
@@ -58,10 +58,10 @@ var lss = (function($, _){
 	}
 
 	return my;
-})($, _);
+});
 
-if (typeof define === 'function' && define.amd) {
-	define('lss', function() {
-		return lss;
-	});
-}
+//if (typeof define === 'function' && define.amd) {
+	//define('lss', ['jquery'], function() {
+		//return lss;
+	//});
+//}
