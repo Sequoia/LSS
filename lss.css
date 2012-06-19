@@ -1,0 +1,8 @@
+.led{
+	display:block;
+	position:absolute;
+	height:0px;
+	width:0px;
+	border:solid 5px red;
+	border-radius:10px;
+}
