@@ -1,0 +1,7 @@
+{
+    "jam_version": "0.1.0",
+    "dependencies": {
+        "jquery": null,
+        "underscore": null
+    }
+}
