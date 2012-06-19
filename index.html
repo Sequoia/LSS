@@ -2,8 +2,10 @@
 	<head>
 		<title>lolshield sequencer</title>
 		<script src="jam/require.js"></script>
-		<script>require(['jquery','underscore','lss.js']);</script>
-		<style src="lss.css" ></style>
+		<script>
+			require(['jquery','underscore','lss.js'],function($,_){
+			});</script>
+		<link rel="stylesheet" href="lss.css" ></link>
 		<!--
 		@TODO
 			create all the dots
@@ -12,6 +14,7 @@
 		-->
 	</head>
 	<body>
-		<div id="shield"></div>
+		<div id="shield">
+		</div>
 	</body>
 </html>
