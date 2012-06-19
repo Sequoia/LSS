@@ -3,6 +3,9 @@ define('lss', ['jquery','underscore'], function($, _){
 
 	var numRows = 9;
 	var numColumns = 14;
+	var ledRadius = '10'; //in px
+	var rowHeight = '30.4'; //px
+	var columnWidth = '34.3'; //px
 	var matrix = []; //cache the jquery elems
 	var my = {};
 
@@ -36,9 +39,6 @@ define('lss', ['jquery','underscore'], function($, _){
 	my.initMarkup = function initMarkup(){
 		var $shield = $('#shield');
 		var $row,$led, i, j;
-		var ledRadius = '5'; //in px
-		var rowHeight = '14'; //px
-		var columnWidth = '14'; //px
 
 		for(i = 0; i < numRows; i++){
 			$row = $('<div data-row="'+i+'" class="row "></div>').appendTo($shield);
@@ -50,18 +50,18 @@ define('lss', ['jquery','underscore'], function($, _){
 		}
 
 		for(i = 0; i < numColumns; i++){
-			$('[data-col='+i+']').animate({'left': (i+1)*columnWidth},1000);
+			$('[data-col='+i+']').animate({'left': (i)*columnWidth},1000);
 		}
 		for(i = 0; i < numRows; i++){
-			$('[data-row='+i+'] .led').animate({'top': (i+1)*rowHeight},{queue:false, duration:1000});
+			$('[data-row='+i+']').animate({'top': (i)*rowHeight},{queue:false, duration:1000});
 		}
+
+		//size
+		$('.led').css({
+			height: ledRadius*2,
+			width: ledRadius*2
+		});
 	}
 
 	return my;
 });
-
-//if (typeof define === 'function' && define.amd) {
-	//define('lss', ['jquery'], function() {
-		//return lss;
-	//});
-//}
