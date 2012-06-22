@@ -1,7 +1,7 @@
 define('lss', ['jquery','underscore'], function($, _){
 	"use strict"
 
-	var $eventHolder; //the shield, where we'll hang events
+	var $eventHolder, $shield; //the shield, where we'll hang events
 	var numRows = 9;
 	var numColumns = 14;
 	var ledRadius = '10'; //in px
@@ -11,9 +11,9 @@ define('lss', ['jquery','underscore'], function($, _){
 	var ledMousedown = false; //to track dragging across multiple leds
 	var my = {};
 
+	//create the dom elements
 	var initMarkup = function initMarkup(){
-		var $shield = $('#shield');
-		$eventHolder = $shield;
+		$eventHolder = $shield = $('#shield');  
 		var $row, $led, i, j;
 
 		for(i = 0; i < numRows; i++){
@@ -82,6 +82,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		}
 	};
 
+	//event bindings and stuff
 	var initHandlers = function(){
 		//bind led click to toggleLed
 		$('.led').bind({
@@ -90,8 +91,10 @@ define('lss', ['jquery','underscore'], function($, _){
 				var $that = $(this);
 				if($that.hasClass('on')){
 					ledMousedown = 'turnOff';
+					$('#shieldBG').css('cursor','s-resize');
 				}else{
 					ledMousedown = 'turnOn';
+					$('#shieldBG').css('cursor','n-resize');
 				}
 				$that.changeLed();
 				$eventHolder.trigger('matrixChange.shield');
@@ -114,9 +117,9 @@ define('lss', ['jquery','underscore'], function($, _){
 		//bind
 		$(window).bind('mouseup',function(){
 				ledMousedown = false;
+				$('#shieldBG').css('cursor','default');
 				console.log('mouseUp');
 		});
-
 		//update the rowcodes when led(s) change
 		$eventHolder.bind({
 			'matrixChange.shield' : function(){
