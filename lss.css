@@ -21,8 +21,15 @@ input.rowcode{
 	display:block;
 	position:absolute;
 	border-radius:100px;
+	background: #900;
 	background: -webkit-radial-gradient( 4px 5px, ellipse cover, #900 0%, black 100%);
+	background: -moz-radial-gradient( 4px 5px, ellipse cover, #900 0%, black 100%);
+	background: -o-radial-gradient( 4px 5px, ellipse cover, #900 0%, black 100%);
+	background: radial-gradient(center, ellipse cover, rgba(30,87,153,1) 0%,rgba(125,185,232,1) 100%); /* W3C */
 }
 .led.on{
 	background: -webkit-radial-gradient( 4px 5px, ellipse cover, #FCC 0%, #F00 100%);
+	background: -moz-radial-gradient( 4px 5px, ellipse cover, #FCC 0%, #F00 100%);
+	background: -o-radial-gradient( 4px 5px, ellipse cover, #FCC 0%, #F00 100%);
+	background: -radial-gradient( 4px 5px, ellipse cover, #FCC 0%, #F00 100%);
 }
