@@ -3,6 +3,9 @@
 	height:383px;
 	background:url(assets/lol_pcb.jpg);
 }
+#shieldBG.drawing{
+	cursor:crosshair;
+}
 #shield{
 	position:absolute;
 	left:26px;
@@ -33,3 +36,24 @@ input.rowcode{
 	background: -o-radial-gradient( 4px 5px, ellipse cover, #FCC 0%, #F00 100%);
 	background: -radial-gradient( 4px 5px, ellipse cover, #FCC 0%, #F00 100%);
 }
+
+/*controls*/
+	#controls{
+		position:absolute;
+		left:507px;
+	}
+/*end controls*/
+
+/* high contrast */
+	.highContrast #shieldBG{
+		background:black;
+		border: solid 1px green;
+	}
+	.highContrast .led{
+		background: black;
+		border: solid 1px red;
+	}
+	.highContrast .led.on{
+		background:red;
+	}
+/*end high contrast*/

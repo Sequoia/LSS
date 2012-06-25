@@ -83,6 +83,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	};
 
 	//event bindings and stuff
+	//JUST for the shield & input/outputs.  extra controls (high contrast etc.) in controls
 	var initHandlers = function(){
 		//bind led click to toggleLed
 		$('.led').bind({
@@ -91,14 +92,13 @@ define('lss', ['jquery','underscore'], function($, _){
 				var $that = $(this);
 				if($that.hasClass('on')){
 					ledMousedown = 'turnOff';
-					$('#shieldBG').css('cursor','s-resize');
 				}else{
 					ledMousedown = 'turnOn';
-					$('#shieldBG').css('cursor','n-resize');
 				}
 				$that.changeLed();
 				$eventHolder.trigger('matrixChange.shield');
 				console.log('ledMousedown');
+				$('#shieldBG').addClass('drawing')
 			},
 			'mouseenter' : function(){
 				//if they clicked and held on an LED, keep turning on/off
@@ -117,7 +117,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		//bind
 		$(window).bind('mouseup',function(){
 				ledMousedown = false;
-				$('#shieldBG').css('cursor','default');
+				$('#shieldBG').removeClass('drawing');
 				console.log('mouseUp');
 		});
 		//update the rowcodes when led(s) change
@@ -137,9 +137,22 @@ define('lss', ['jquery','underscore'], function($, _){
 
 	};
 
+	var initControls = function(){
+		var $controls = $('#controls');
+		var $hC = $controls.find('#highContrast');
+		$hC.bind('change',function(e){
+			if($(this).is(':checked')){
+				$('body').addClass('highContrast');
+			}else{
+				$('body').removeClass('highContrast');
+			}
+		});
+	};
+
 	my.init = function(){
 		initMarkup();
 		initHandlers();
+		initControls();
 	};
 
 	my.turnOn = function(x,y){
