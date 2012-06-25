@@ -7,7 +7,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	var ledRadius = '10'; //in px
 	var rowHeight = '30.4'; //px
 	var columnWidth = '34.3'; //px
-	var matrix = []; //cache the jquery elems
+	var matrix = {}; //cache the rows' jquery elems
 	var ledMousedown = false; //to track dragging across multiple leds
 	var my = {};
 
@@ -18,11 +18,15 @@ define('lss', ['jquery','underscore'], function($, _){
 
 		for(i = 0; i < numRows; i++){
 			$row = $('<div data-row="'+i+'" class="row "></div>').appendTo($shield);
-			matrix[i] = [];
+			matrix[i] = { leds : [] };
+			//create dots
 			for(j = 0; j < numColumns; j++){
 				$led = $('<span data-col="'+j+'" class = "led" ></span>').appendTo($row);
-				matrix[i].push($led);
+				matrix[i].leds.push($led);
 			}
+			//create text input for rowcode
+			matrix[i].rowcodeInput = $('<input type="text" class="rowcode" name="rowcode'+i+'" />')
+				.appendTo($row);
 		}
 
 		for(i = 0; i < numColumns; i++){
@@ -37,6 +41,21 @@ define('lss', ['jquery','underscore'], function($, _){
 			height: ledRadius*2,
 			width: ledRadius*2
 		});
+	};
+
+	my.updateRowcodes = function(){
+		var rowcode, i, j;
+		for(i = 0; i < numRows; i++){
+			rowcode = 0;
+			//calculate the rowcode
+			for(j = 0; j < numColumns; j++){
+				if(matrix[i].leds[j].hasClass('on')){
+					rowcode += Math.pow(2,j);
+				}
+			}
+			//apply it to the input
+			matrix[i].rowcodeInput.attr('value',rowcode);
+		}
 	};
 
 	//send 'on' or 'off' to go one direction, otherwise toggles
@@ -87,16 +106,32 @@ define('lss', ['jquery','underscore'], function($, _){
 					}else{
 						$that.changeLed('off');
 					}
+					$eventHolder.trigger('matrixChange.shield');
 				}
 			}
 		});
 
+		//bind
 		$(window).bind('mouseup',function(){
 				ledMousedown = false;
 				console.log('mouseUp');
 		});
-		//bind
-		//update rowcodes on shield change
+
+		//update the rowcodes when led(s) change
+		$eventHolder.bind({
+			'matrixChange.shield' : function(){
+				my.updateRowcodes();
+			}
+		});
+
+		//update row when rowcode changes
+		$('.rowcode').bind('change.shield', function(e){
+			var $that = $(this);
+			var rowcode = $that.attr('value');
+			var rowNum = $that.parent().data('row');
+			my.drawRow( rowNum , rowcode );
+		});
+
 	};
 
 	my.init = function(){
@@ -105,11 +140,11 @@ define('lss', ['jquery','underscore'], function($, _){
 	};
 
 	my.turnOn = function(x,y){
-		matrix[x][y].addClass('on');
+		matrix[x].leds[y].addClass('on');
 	};
 
 	my.turnOff = function(x,y){
-		matrix[x][y].removeClass('on');
+		matrix[x].leds[y].removeClass('on');
 	};
 
 	my.drawRow = function(rowNum,colData){

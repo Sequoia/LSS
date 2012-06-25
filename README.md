@@ -1,8 +1,8 @@
 ##Todo
 ###Round one
-* Output rowcode for each row
-** update on row.change
-** Allow flow from rowcode to row
+* ✓ Output rowcode for each row
+** ✓ update on row.change (matrixChange.shield)
+** ✓ Allow flow from rowcode to row
 ###Round two
 * Output array of all rowcodes to text box
 ** update on row.change
