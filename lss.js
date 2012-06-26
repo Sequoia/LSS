@@ -1,5 +1,7 @@
+/*global console, window */
+
 define('lss', ['jquery','underscore'], function($, _){
-	"use strict"
+	"use strict";
 
 	var $eventHolder, $shield; //the shield, where we'll hang events
 	var numRows = 9;
@@ -77,7 +79,7 @@ define('lss', ['jquery','underscore'], function($, _){
 			if(onoff === 'on'){
 				my.turnOn(x,y);
 			}else if(onoff ==='off'){
-				my.turnOff(x,y)
+				my.turnOff(x,y);
 			} else{
 				throw '$.fn.changeLed() only takes "on" or "off" as an argument';
 			}
@@ -107,7 +109,7 @@ define('lss', ['jquery','underscore'], function($, _){
 				$that.changeLed();
 				$eventHolder.trigger('matrixChange.shield');
 				console.log('ledMousedown');
-				$('#shieldBG').addClass('drawing')
+				$('#shieldBG').addClass('drawing');
 			},
 			'mouseenter' : function(){
 				//if they clicked and held on an LED, keep turning on/off
@@ -129,11 +131,13 @@ define('lss', ['jquery','underscore'], function($, _){
 				$('#shieldBG').removeClass('drawing');
 				console.log('mouseUp');
 		});
+
 		//update the rowcodes when led(s) change
 		$eventHolder.bind({
 			'matrixChange.shield' : function(){
 				my.updateRowcodes();
 				updateMatrixcode();
+				console.log('matrixChange.shield triggered');
 			}
 		});
 
@@ -143,6 +147,26 @@ define('lss', ['jquery','underscore'], function($, _){
 			var rowcode = $that.attr('value');
 			var rowNum = $that.parent().data('row');
 			my.drawRow( rowNum , rowcode );
+		});
+
+		//update row when rowcode changes
+		$('input#matrixCode').bind('change.shield', function(e){
+			var i;
+			var $that = $(this);
+			var matrixCode = $that.attr('value');
+			var matrixCodeArray = matrixCode.split(',');
+			console.log(matrixCodeArray.length);
+			console.log(/^[0-9,]$/.test(matrixCode));
+			console.log(matrixCode);
+			if(matrixCodeArray.length !== numRows || !/^[0-9,]+$/.test(matrixCode)){ 
+				console.log(':(');
+				return false; //make sure the string is legit
+			}
+			for(i = 0; i < numRows; i++){
+				my.drawRow( i, matrixCodeArray[i]);
+			}
+			$eventHolder.trigger('matrixChange.shield');
+			console.log('matrixCode change');
 		});
 
 	};
@@ -189,7 +213,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		var i;
 		for( i=0 ; i < numRows ; i++){
 			my.drawRow( i , matrixData[i]);
-		};
+		}
 	};
 
 	return my;
