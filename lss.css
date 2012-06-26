@@ -1,6 +1,9 @@
 input{
 	border: solid 1px red;
 }
+input,div[contenteditable]{
+	font-family:courier;
+}
 #shieldBG{
 	width:500px;
 	height:383px;
@@ -53,6 +56,27 @@ input.rowcode{
 		left:10px;
 		top:394px;
 		width:400px;
+	}
+	button#pushMatrixCode{
+		position:absolute;
+		left:420px;
+		margin-top:4px;
+		width:90px;
+	}
+	button#play{
+		position:absolute;
+		left:520px;
+		margin-top:4px;
+		width:90px;
+	}
+	div#sequence{
+		position:absolute;
+		left:625px;
+		top:10px;
+		width:500px;
+		height:90%;
+		font-size:.9em;
+		border:solid 1px red;
 	}
 /* end misc */
 

@@ -69,6 +69,16 @@ define('lss', ['jquery','underscore'], function($, _){
 		}
 	};
 
+	//sequence: array of matrixCodes
+	var playThru = function(sequence){
+		var i=0;
+		while(sequence.length){
+			console.log(sequence);
+			window.setTimeout(my.draw,i,sequence.shift());
+			i+=1000;
+		}
+	};
+
 	//send 'on' or 'off' to go one direction, otherwise toggles
 	$.fn.changeLed = function(onoff){
 		if(!this.hasClass('led')){ throw "tried to toggleLed on non-led"; }
@@ -147,33 +157,27 @@ define('lss', ['jquery','underscore'], function($, _){
 			var rowcode = $that.attr('value');
 			var rowNum = $that.parent().data('row');
 			my.drawRow( rowNum , rowcode );
+			$eventHolder.trigger('matrixChange.shield');
 		});
 
-		//update row when rowcode changes
+		//update row when matrixCode changes
 		$('input#matrixCode').bind('change.shield', function(e){
-			var i;
 			var $that = $(this);
 			var matrixCode = $that.attr('value');
 			var matrixCodeArray = matrixCode.split(',');
-			console.log(matrixCodeArray.length);
-			console.log(/^[0-9,]$/.test(matrixCode));
-			console.log(matrixCode);
 			if(matrixCodeArray.length !== numRows || !/^[0-9,]+$/.test(matrixCode)){ 
 				console.log(':(');
 				return false; //make sure the string is legit
 			}
-			for(i = 0; i < numRows; i++){
-				my.drawRow( i, matrixCodeArray[i]);
-			}
+			my.draw(matrixCodeArray);
 			$eventHolder.trigger('matrixChange.shield');
-			console.log('matrixCode change');
 		});
-
 	};
 
 	var initControls = function(){
 		var $controls = $('#controls');
 		var $hC = $controls.find('#highContrast');
+
 		$hC.bind('change',function(e){
 			if($(this).is(':checked')){
 				$('body').addClass('highContrast');
@@ -181,6 +185,26 @@ define('lss', ['jquery','underscore'], function($, _){
 				$('body').removeClass('highContrast');
 			}
 		});
+
+		//push matrixCode to sequence
+		$('button#pushMatrixCode').bind('click',function(e){
+			var matrixCode = $('#matrixCode').attr('value');
+			var sequence = $('#sequence').html();
+			sequence += matrixCode + "<br>\n";
+			$('#sequence').html(sequence);
+			console.log(sequence);
+		});
+
+		//playThru
+		$('button#play').bind('click',function(e){
+			var sequence = $('#sequence').html();
+			console.log(sequence);
+			console.log(sequence.match(/([0-9]*,)</));
+			var matrixArray = sequence.split("<br>");
+			console.log(matrixArray);
+			playThru(matrixArray);
+		});
+
 	};
 
 	my.init = function(){
@@ -210,6 +234,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	};
 
 	my.draw = function(matrixData){
+		console.log('drawing ' + matrixData);
 		var i;
 		for( i=0 ; i < numRows ; i++){
 			my.drawRow( i , matrixData[i]);

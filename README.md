@@ -9,8 +9,8 @@
   * ✓ update on row.change
   * ✓ allow flow from array of all codes to shield
 
-### Round two.five
-* save button to push rowcode to a textarea
+### ✓ Round two.five
+* ✓ save button to push rowcode to a textarea
   
 ###Round three
 * Allow playthru of all rowcodes in textarea
