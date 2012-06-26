@@ -1,3 +1,6 @@
+input{
+	border: solid 1px red;
+}
 #shieldBG{
 	width:500px;
 	height:383px;
@@ -18,7 +21,6 @@ input.rowcode{
 	position:absolute;
 	left:485px;
 	width:100px;
-	border: solid 1px red;
 }
 .led{
 	display:block;
@@ -41,8 +43,19 @@ input.rowcode{
 	#controls{
 		position:absolute;
 		left:507px;
+		top:10px;
 	}
 /*end controls*/
+
+/* misc */
+	#matrixCode{
+		position:absolute;
+		left:10px;
+		top:394px;
+		width:400px;
+	}
+/* end misc */
+
 
 /* high contrast */
 	.highContrast #shieldBG{

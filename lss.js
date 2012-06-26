@@ -43,6 +43,15 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 	};
 
+	var updateMatrixcode = function(){
+		var $matrixCode = $('input#matrixCode');
+		var codeArray = [];
+		_.each(matrix,function(val,key){
+			codeArray.push(val.rowcodeInput.attr('value'));
+		});
+		$matrixCode.attr('value',codeArray.join(','));
+	};
+
 	my.updateRowcodes = function(){
 		var rowcode, i, j;
 		for(i = 0; i < numRows; i++){
@@ -124,6 +133,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		$eventHolder.bind({
 			'matrixChange.shield' : function(){
 				my.updateRowcodes();
+				updateMatrixcode();
 			}
 		});
 
