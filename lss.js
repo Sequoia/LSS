@@ -73,7 +73,6 @@ define('lss', ['jquery','underscore'], function($, _){
 	var playThru = function(sequence){
 		var i=0;
 		while(sequence.length){
-			console.log(sequence);
 			window.setTimeout(my.draw,i,sequence.shift());
 			i+=1000;
 		}
@@ -190,18 +189,24 @@ define('lss', ['jquery','underscore'], function($, _){
 		$('button#pushMatrixCode').bind('click',function(e){
 			var matrixCode = $('#matrixCode').attr('value');
 			var sequence = $('#sequence').html();
-			sequence += matrixCode + "<br>\n";
+			sequence += "{" + matrixCode + "},<br>\n";
 			$('#sequence').html(sequence);
 			console.log(sequence);
 		});
 
 		//playThru
 		$('button#play').bind('click',function(e){
-			var sequence = $('#sequence').html();
-			console.log(sequence);
-			console.log(sequence.match(/([0-9]*,)</));
-			var matrixArray = sequence.split("<br>");
-			console.log(matrixArray);
+			//get and cleanup sequence data
+			var sequence = $('#sequence').text();
+			var matrixArrayDirty = sequence.split("},");
+			matrixArrayDirty = _.filter(matrixArrayDirty,function(str){
+				return str.trim().length;//remove ""
+			});
+			var matrixArray = _.map(matrixArrayDirty, function(str){
+				var newStr = str.match(/[0-9].*$/)[0];
+				var ray = newStr.split(',');
+				return ray;
+			});
 			playThru(matrixArray);
 		});
 
@@ -211,6 +216,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		initMarkup();
 		initHandlers();
 		initControls();
+		$eventHolder.trigger('matrixChange.shield');
 	};
 
 	my.turnOn = function(x,y){
