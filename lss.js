@@ -11,6 +11,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	var columnWidth = '34.3'; //px
 	var matrix = {}; //cache the rows' jquery elems
 	var ledMousedown = false; //to track dragging across multiple leds
+	var playbackInterval = 200; //playback speed
 	var my = {};
 
 	//create the dom elements
@@ -74,7 +75,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		var i=0;
 		while(sequence.length){
 			window.setTimeout(my.draw,i,sequence.shift());
-			i+=1000;
+			i+=playbackInterval;
 		}
 	};
 
