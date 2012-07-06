@@ -46,7 +46,12 @@ input.rowcode{
 	#controls{
 		position:absolute;
 		left:507px;
-		top:10px;
+		top:350px;
+	}
+	#controls button{
+		width:100px;
+		display:block;
+		margin-left:5px;
 	}
 /*end controls*/
 
@@ -56,18 +61,6 @@ input.rowcode{
 		left:10px;
 		top:394px;
 		width:400px;
-	}
-	button#pushMatrixCode{
-		position:absolute;
-		left:420px;
-		margin-top:4px;
-		width:90px;
-	}
-	button#play{
-		position:absolute;
-		left:520px;
-		margin-top:4px;
-		width:90px;
 	}
 	div#sequence{
 		position:absolute;

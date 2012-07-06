@@ -1,4 +1,5 @@
 /*global console, window */
+//@TODO remove dom stuff from this script, make it an "output driver"
 
 define('lss', ['jquery','underscore'], function($, _){
 	"use strict";
