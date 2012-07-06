@@ -1,0 +1,3 @@
+[submodule "jam/mousetrap"]
+	path = jam/mousetrap
+	url = https://github.com/ccampbell/mousetrap.git
