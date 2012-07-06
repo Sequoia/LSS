@@ -11,8 +11,10 @@ define('lss', ['jquery','underscore'], function($, _){
 	var columnWidth = '34.3'; //px
 	var matrix = {}; //cache the rows' jquery elems
 	var ledMousedown = false; //to track dragging across multiple leds
-	var playbackInterval = 200; //playback speed
-	var my = {};
+	var playSpeed= 200; //playback speed
+	var playStack = []; //holds states to be played thru
+	var playIntervalID; //where the playback "setInterval" is stored for pausing
+	var exports; //retuns/exports
 
 	//create the dom elements
 	var initMarkup = function initMarkup(){
@@ -55,7 +57,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		$matrixCode.attr('value',codeArray.join(','));
 	};
 
-	my.updateRowcodes = function(){
+	var updateRowcodes = function(){
 		var rowcode, i, j;
 		for(i = 0; i < numRows; i++){
 			rowcode = 0;
@@ -70,12 +72,52 @@ define('lss', ['jquery','underscore'], function($, _){
 		}
 	};
 
+
+	//get and cleanup sequence data
+	//@param selector: sizzle/css selector for sequence container
+	//       default: #sequence
+	var getSequenceFromHtml = function(selector){
+		selector = selector || "#sequence";
+		var sequence = $(selector).text();
+		var matrixArrayDirty = sequence.split("},");
+		matrixArrayDirty = _.filter(matrixArrayDirty,function(str){
+			return str.trim().length;//remove ""
+		});
+		var matrixArray = _.map(matrixArrayDirty, function(str){
+			var newStr = str.match(/[0-9].*$/)[0];
+			var ray = newStr.split(',');
+			return ray;
+		});
+		return matrixArray;
+	}
+
 	//sequence: array of matrixCodes
 	var playThru = function(sequence){
-		var i=0;
-		while(sequence.length){
-			window.setTimeout(my.draw,i,sequence.shift());
-			i+=playbackInterval;
+		playStack = sequence;
+		playIntervalID = window.setInterval(playNextState,playSpeed);
+	};
+
+	var play = function(){
+		var sequence = getSequenceFromHtml();
+		playThru(sequence);
+	}
+
+	var pause = function(){
+		clearInterval(playIntervalID); //stop
+	}
+
+	var unpause = function(){
+		if(playStack.length){
+			playIntervalID = window.setInterval(playNextState,playSpeed);
+		}
+	}
+
+	var playNextState = function(){
+		var nextState = playStack.shift();
+		if(typeof nextState !== 'undefined'){
+			draw(nextState);
+		}else{
+			clearInterval(playIntervalID); //stop
 		}
 	};
 
@@ -87,18 +129,18 @@ define('lss', ['jquery','underscore'], function($, _){
 		//'on' or 'off' sent
 		if(typeof onoff !== 'undefined'){
 			if(onoff === 'on'){
-				my.turnOn(x,y);
+				turnOn(x,y);
 			}else if(onoff ==='off'){
-				my.turnOff(x,y);
+				turnOff(x,y);
 			} else{
 				throw '$.fn.changeLed() only takes "on" or "off" as an argument';
 			}
 		}else{ //toggle
 			if(this.hasClass('on')){
-				my.turnOff(x,y);
+				turnOff(x,y);
 			}
 			else{
-				my.turnOn(x,y);
+				turnOn(x,y);
 			}
 		}
 	};
@@ -145,7 +187,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		//update the rowcodes when led(s) change
 		$eventHolder.bind({
 			'matrixChange.shield' : function(){
-				my.updateRowcodes();
+				updateRowcodes();
 				updateMatrixcode();
 				console.log('matrixChange.shield triggered');
 			}
@@ -156,7 +198,7 @@ define('lss', ['jquery','underscore'], function($, _){
 			var $that = $(this);
 			var rowcode = $that.attr('value');
 			var rowNum = $that.parent().data('row');
-			my.drawRow( rowNum , rowcode );
+			drawRow( rowNum , rowcode );
 			$eventHolder.trigger('matrixChange.shield');
 		});
 
@@ -169,7 +211,7 @@ define('lss', ['jquery','underscore'], function($, _){
 				console.log(':(');
 				return false; //make sure the string is legit
 			}
-			my.draw(matrixCodeArray);
+			draw(matrixCodeArray);
 			$eventHolder.trigger('matrixChange.shield');
 		});
 	};
@@ -196,57 +238,54 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 
 		//playThru
-		$('button#play').bind('click',function(e){
-			//get and cleanup sequence data
-			var sequence = $('#sequence').text();
-			var matrixArrayDirty = sequence.split("},");
-			matrixArrayDirty = _.filter(matrixArrayDirty,function(str){
-				return str.trim().length;//remove ""
-			});
-			var matrixArray = _.map(matrixArrayDirty, function(str){
-				var newStr = str.match(/[0-9].*$/)[0];
-				var ray = newStr.split(',');
-				return ray;
-			});
-			playThru(matrixArray);
-		});
+		$('button#play').bind('click',play);
 
 	};
 
-	my.init = function(){
+	var init = function(){
 		initMarkup();
 		initHandlers();
 		initControls();
 		$eventHolder.trigger('matrixChange.shield');
 	};
 
-	my.turnOn = function(x,y){
+	var turnOn = function(x,y){
 		matrix[x].leds[y].addClass('on');
 	};
 
-	my.turnOff = function(x,y){
+	var turnOff = function(x,y){
 		matrix[x].leds[y].removeClass('on');
 	};
 
-	my.drawRow = function(rowNum,colData){
+	var drawRow = function(rowNum,colData){
 		//left to right
 		var i;
 		for(i=0;i<numColumns;i++){
 			if(colData & Math.pow(2,i)){
-				my.turnOn(rowNum,i);
+				turnOn(rowNum,i);
 			}else{
-				my.turnOff(rowNum,i);
+				turnOff(rowNum,i);
 			}
 		}
 	};
 
-	my.draw = function(matrixData){
+	var draw = function(matrixData){
 		console.log('drawing ' + matrixData);
 		var i;
 		for( i=0 ; i < numRows ; i++){
-			my.drawRow( i , matrixData[i]);
+			drawRow( i , matrixData[i]);
 		}
 	};
 
-	return my;
+	exports ={
+		init			: init,
+		turnOn		: turnOn,
+		turnOff		: turnOff,
+		drawRow		: drawRow,
+		draw			: draw,
+		play			: play,
+		pause			: pause,
+		unpause		: unpause
+	}
+	return exports;
 });
