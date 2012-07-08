@@ -5,17 +5,13 @@ require.config({
 	},
 	shim : {
 		'Mousetrap' : {
-			exports : function(){
-				return this.Mousetrap;
-			}
+			exports : 'Mousetrap'
 		}
 	}
 });
 
 require(['jquery','underscore','Mousetrap','lss'],function($,_,Mousetrap,lss){
 	$(function(){
-		console.log(Mousetrap);
-		console.log(this.Mousetrap);
 		lsss=lss;
 		lss.init();
 	});
