@@ -1061,7 +1061,9 @@
   // that don't enforce next-turn semantics on modules.
   if (typeof define === 'function' && define.amd) {
     define('underscore', function() {
-      return _;
+      var exports = _;
+      exports._ = _;
+      return exports;
     });
   }
 
