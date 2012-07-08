@@ -16,14 +16,15 @@ define('lss', ['jquery','underscore'], function($, _){
 	var playStack = []; //holds states to be played thru
 	var playIntervalID; //where the playback "setInterval" is stored for pausing
 	var exports; //retuns/exports
+	var UIelems = []; //buttons TODO: move this out to i/o driver
 
 	//create the dom elements
 	var initMarkup = function initMarkup(){
-		$eventHolder = $shield = $('#shield');  
+		$eventHolder = UIelems['shield'] = $('#shield');  
 		var $row, $led, i, j;
 
 		for(i = 0; i < numRows; i++){
-			$row = $('<div data-row="'+i+'" class="row "></div>').appendTo($shield);
+			$row = $('<div data-row="'+i+'" class="row "></div>').appendTo(UIelems['shield']);
 			matrix[i] = { leds : [] };
 			//create dots
 			for(j = 0; j < numColumns; j++){
@@ -47,15 +48,21 @@ define('lss', ['jquery','underscore'], function($, _){
 			height: ledRadius*2,
 			width: ledRadius*2
 		});
+
+		//other elems
+		UIelems['play'] = $('button#play');
+		UIelems['pause'] = $('button#pause');
+		UIelems['add'] = $('button#pushMatrixCode');
+		UIelems['matrixCode'] = $('input#matrixCode');
+		UIelems['sequence'] = $('#sequence');
 	};
 
 	var updateMatrixcode = function(){
-		var $matrixCode = $('input#matrixCode');
 		var codeArray = [];
 		_.each(matrix,function(val,key){
 			codeArray.push(val.rowcodeInput.attr('value'));
 		});
-		$matrixCode.attr('value',codeArray.join(','));
+		UIelems['matrixCode'].attr('value',codeArray.join(','));
 	};
 
 	var updateRowcodes = function(){
@@ -78,8 +85,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	//@param selector: sizzle/css selector for sequence container
 	//       default: #sequence
 	var getSequenceFromHtml = function(selector){
-		selector = selector || "#sequence";
-		var sequence = $(selector).text();
+		var sequence = UIelems['sequence'].text();
 		var matrixArrayDirty = sequence.split("},");
 		matrixArrayDirty = _.filter(matrixArrayDirty,function(str){
 			return str.trim().length;//remove ""
@@ -104,21 +110,23 @@ define('lss', ['jquery','underscore'], function($, _){
 	}
 
 	var pause = function(){
-		clearInterval(playIntervalID); //stop
-	}
-
-	var unpause = function(){
-		if(playStack.length){
+		if(playIntervalID){
+			clearInterval(playIntervalID); //stop
+			playIntervalID = false;
+		}else if(playStack.length){
 			playIntervalID = window.setInterval(playNextState,playSpeed);
 		}
+		console.log(playStack.length);
 	}
 
 	var playNextState = function(){
 		var nextState = playStack.shift();
 		if(typeof nextState !== 'undefined'){
 			draw(nextState);
+			$eventHolder.trigger('matrixChange.shield');
 		}else{
 			clearInterval(playIntervalID); //stop
+			playIntervalID = false;
 		}
 	};
 
@@ -230,17 +238,29 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 
 		//push matrixCode to sequence
-		$('button#pushMatrixCode').bind('click',function(e){
+		UIelems['add'].bind('click',function(e){
 			var matrixCode = $('#matrixCode').attr('value');
-			var sequence = $('#sequence').html();
+			var sequence = UIelems['sequence'].html();
 			sequence += "{" + matrixCode + "},<br>\n";
-			$('#sequence').html(sequence);
+			UIelems['sequence'].html(sequence);
 			console.log(sequence);
 		});
 
 		//playThru
-		$('button#play').bind('click',play);
+		UIelems['play'].bind('click',function(){
+			UIelems['pause'].attr('disabled',false);
+			play();
+		});
 
+		UIelems['pause'].bind('click',function(e){
+			var $that = $(this);
+			if($that.is(':disabled')){
+				$that.attr('disabled',true);
+			}else{
+				$that.attr('disabled',false);
+			}
+			pause();
+		});
 	};
 
 	var init = function(){
@@ -285,8 +305,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		drawRow		: drawRow,
 		draw			: draw,
 		play			: play,
-		pause			: pause,
-		unpause		: unpause
+		pause			: pause
 	}
 	return exports;
 });
