@@ -1,4 +1,7 @@
 <?php
+	if(array_key_exists('ping',$_POST)){
+		exit('pong');
+	}
 //this will not work unless
 //a) serial_device points to your arduino serial connection
 //b) you OS takes data written to the device location and sends it over the
