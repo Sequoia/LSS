@@ -15,7 +15,6 @@ define('lss', ['jquery','underscore'], function($, _){
 	var playSpeed= 200; //playback speed
 	var playStack = []; //holds states to be played thru
 	var playIntervalID; //where the playback "setInterval" is stored for pausing
-	var exports; //retuns/exports
 	var UIelems = []; //buttons TODO: move this out to i/o driver
 
 	//create the dom elements
@@ -217,7 +216,7 @@ define('lss', ['jquery','underscore'], function($, _){
 			var matrixCode = $that.attr('value');
 			var matrixCodeArray = matrixCode.split(',');
 			if(matrixCodeArray.length !== numRows || !/^[0-9,]+$/.test(matrixCode)){ 
-				console.log(':(');
+				console.log('bad matrixCodeArray:(');
 				return false; //make sure the string is legit
 			}
 			draw(matrixCodeArray);
@@ -268,6 +267,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		initHandlers();
 		initControls();
 		$eventHolder.trigger('matrixChange.shield');
+		return $eventHolder; //return shield for attaching more events
 	};
 
 	var turnOn = function(x,y){
@@ -298,7 +298,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		}
 	};
 
-	exports ={
+	return {
 		init			: init,
 		turnOn		: turnOn,
 		turnOff		: turnOff,
@@ -307,5 +307,4 @@ define('lss', ['jquery','underscore'], function($, _){
 		play			: play,
 		pause			: pause
 	}
-	return exports;
 });
