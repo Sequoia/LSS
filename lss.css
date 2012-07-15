@@ -53,6 +53,18 @@ input.rowcode{
 		display:block;
 		margin-left:5px;
 	}
+	#savedSketches{
+		width:400px;
+		position: absolute;
+		top: 420px;
+		left: 10px;
+		font-family:courier;
+	}
+	a.savedSketch{
+		display:block;
+		color:blue;
+		cursor:pointer;
+	}
 /*end controls*/
 
 /* misc */
@@ -67,7 +79,7 @@ input.rowcode{
 		left:625px;
 		top:10px;
 		width:500px;
-		height:90%;
+		min-height:90%;
 		font-size:.9em;
 		border:solid 1px red;
 	}

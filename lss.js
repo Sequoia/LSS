@@ -16,6 +16,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	var playStack = []; //holds states to be played thru
 	var playIntervalID; //where the playback "setInterval" is stored for pausing
 	var UIelems = []; //buttons TODO: move this out to i/o driver
+	var LScache = {}; //local storage sketches in an object
 
 	//create the dom elements
 	var initMarkup = function initMarkup(){
@@ -262,10 +263,72 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 	};
 
+	var initLocalStorage = function(){
+		var k = 0; //counter
+		//get the stuff that is there now & deserialize
+		LScache = JSON.parse(localStorage.sketches);
+		//create links for it and append to container
+		_.each( LScache, function(sText,sName){
+			$('<a></a>')
+				.text(sName)
+				.addClass('savedSketch')
+				.data('name', sName)
+				.data('sequence', sText)
+				.appendTo('#savedSketches');
+		});
+
+		//////////bind the events
+		//save
+		$('button#save').bind('click.shield',function(e){
+			var $that = $(this);
+			var sName = window.prompt('What is your sequence called?');
+			var sText = UIelems['sequence'].html();
+			if(sName.length < 2){
+				alert('too short');
+				return;
+			};
+			writeToLS(sName , sText);
+		});
+
+		//load
+		$('a.savedSketch').on('click',function(e){
+			var $that = $(this);
+			UIelems['sequence'].html($that.data('sequence'));
+		});
+	};
+
+	//write sequence to local storage
+	var writeToLS = function(sName,sText){
+		console.log(sText)
+		console.log(LScache);
+		//append sketch link to sketches on page
+		$('<a></a>')
+				.text(sName)
+				.addClass('savedSketch')
+				.data('name', sName)
+				.data('sequence', sText)
+				.appendTo('#savedSketches')
+				.on('click',function(e){
+					var $that = $(this);
+					UIelems['sequence'].html($that.data('sequence'));
+				});
+		//append new sketch to LScache
+		LScache[sName] = sText;
+		//serialize & write to localstorage
+		localStorage.sketches = JSON.stringify(LScache);
+		console.log(LScache);
+	};
+
+	//read from LS and load into sequence holder
+	var loadSequence = function(sequence){
+		$('#sequence').html(sequence);
+	}
+
 	var init = function(){
 		initMarkup();
 		initHandlers();
 		initControls();
+		initLocalStorage();
 		$eventHolder.trigger('matrixChange.shield');
 		return $eventHolder; //return shield for attaching more events
 	};
