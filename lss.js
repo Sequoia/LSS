@@ -266,7 +266,11 @@ define('lss', ['jquery','underscore'], function($, _){
 	var initLocalStorage = function(){
 		var k = 0; //counter
 		//get the stuff that is there now & deserialize
-		LScache = JSON.parse(localStorage.sketches);
+		try{
+			LScache = JSON.parse(localStorage.sketches);
+		}catch(e){
+			LScache = {};
+		}
 		//create links for it and append to container
 		_.each( LScache, function(sText,sName){
 			$('<a></a>')
