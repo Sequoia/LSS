@@ -1,4 +1,5 @@
-/*global console, window */
+/*jshint browser:true */
+/*global console, */
 //@TODO remove dom stuff from this script, make it an "output driver"
 
 define('lss', ['jquery','underscore'], function($, _){
@@ -20,11 +21,11 @@ define('lss', ['jquery','underscore'], function($, _){
 
 	//create the dom elements
 	var initMarkup = function initMarkup(){
-		$eventHolder = UIelems['shield'] = $('#shield');  
+		$eventHolder = UIelems.shield = $('#shield');  
 		var $row, $led, i, j;
 
 		for(i = 0; i < numRows; i++){
-			$row = $('<div data-row="'+i+'" class="row "></div>').appendTo(UIelems['shield']);
+			$row = $('<div data-row="'+i+'" class="row "></div>').appendTo(UIelems.shield);
 			matrix[i] = { leds : [] };
 			//create dots
 			for(j = 0; j < numColumns; j++){
@@ -50,11 +51,11 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 
 		//other elems
-		UIelems['play'] = $('button#play');
-		UIelems['pause'] = $('button#pause');
-		UIelems['add'] = $('button#pushMatrixCode');
-		UIelems['matrixCode'] = $('input#matrixCode');
-		UIelems['sequence'] = $('#sequence');
+		UIelems.play = $('button#play');
+		UIelems.pause = $('button#pause');
+		UIelems.add = $('button#pushMatrixCode');
+		UIelems.matrixCode = $('input#matrixCode');
+		UIelems.sequence = $('#sequence');
 	};
 
 	var updateMatrixcode = function(){
@@ -62,7 +63,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		_.each(matrix,function(val,key){
 			codeArray.push(val.rowcodeInput.attr('value'));
 		});
-		UIelems['matrixCode'].attr('value',codeArray.join(','));
+		UIelems.matrixCode.attr('value',codeArray.join(','));
 	};
 
 	var updateRowcodes = function(){
@@ -85,7 +86,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	//@param selector: sizzle/css selector for sequence container
 	//       default: #sequence
 	var getSequenceFromHtml = function(selector){
-		var sequence = UIelems['sequence'].text();
+		var sequence = UIelems.sequence.text();
 		var matrixArrayDirty = sequence.split("},");
 		matrixArrayDirty = _.filter(matrixArrayDirty,function(str){
 			return str.trim().length;//remove ""
@@ -96,7 +97,7 @@ define('lss', ['jquery','underscore'], function($, _){
 			return ray;
 		});
 		return matrixArray;
-	}
+	};
 
 	//sequence: array of matrixCodes
 	var playThru = function(sequence){
@@ -107,7 +108,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	var play = function(){
 		var sequence = getSequenceFromHtml();
 		playThru(sequence);
-	}
+	};
 
 	var pause = function(){
 		if(playIntervalID){
@@ -117,7 +118,7 @@ define('lss', ['jquery','underscore'], function($, _){
 			playIntervalID = window.setInterval(playNextState,playSpeed);
 		}
 		console.log(playStack.length);
-	}
+	};
 
 	var playNextState = function(){
 		var nextState = playStack.shift();
@@ -152,6 +153,7 @@ define('lss', ['jquery','underscore'], function($, _){
 				turnOn(x,y);
 			}
 		}
+		return this;
 	};
 
 	//event bindings and stuff
@@ -238,21 +240,21 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 
 		//push matrixCode to sequence
-		UIelems['add'].bind('click',function(e){
+		UIelems.add.bind('click',function(e){
 			var matrixCode = $('#matrixCode').attr('value');
-			var sequence = UIelems['sequence'].html();
+			var sequence = UIelems.sequence.html();
 			sequence += "{" + matrixCode + "},<br>\n";
-			UIelems['sequence'].html(sequence);
+			UIelems.sequence.html(sequence);
 			console.log(sequence);
 		});
 
 		//playThru
-		UIelems['play'].bind('click',function(){
-			UIelems['pause'].attr('disabled',false);
+		UIelems.play.bind('click',function(){
+			UIelems.pause.attr('disabled',false);
 			play();
 		});
 
-		UIelems['pause'].bind('click',function(e){
+		UIelems.pause.bind('click',function(e){
 			var $that = $(this);
 			if($that.is(':disabled')){
 				$that.attr('disabled',true);
@@ -286,24 +288,24 @@ define('lss', ['jquery','underscore'], function($, _){
 		$('button#save').bind('click.shield',function(e){
 			var $that = $(this);
 			var sName = window.prompt('What is your sequence called?');
-			var sText = UIelems['sequence'].html();
+			var sText = UIelems.sequence.html();
 			if(sName.length < 2){
-				alert('too short');
+				window.alert('too short');
 				return;
-			};
+			}
 			writeToLS(sName , sText);
 		});
 
 		//load
 		$('a.savedSketch').on('click',function(e){
 			var $that = $(this);
-			UIelems['sequence'].html($that.data('sequence'));
+			UIelems.sequence.html($that.data('sequence'));
 		});
 	};
 
 	//write sequence to local storage
 	var writeToLS = function(sName,sText){
-		console.log(sText)
+		console.log(sText);
 		console.log(LScache);
 		//append sketch link to sketches on page
 		$('<a></a>')
@@ -314,7 +316,7 @@ define('lss', ['jquery','underscore'], function($, _){
 				.appendTo('#savedSketches')
 				.on('click',function(e){
 					var $that = $(this);
-					UIelems['sequence'].html($that.data('sequence'));
+					UIelems.sequence.html($that.data('sequence'));
 				});
 		//append new sketch to LScache
 		LScache[sName] = sText;
@@ -326,7 +328,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	//read from LS and load into sequence holder
 	var loadSequence = function(sequence){
 		$('#sequence').html(sequence);
-	}
+	};
 
 	var init = function(){
 		initMarkup();
@@ -358,7 +360,7 @@ define('lss', ['jquery','underscore'], function($, _){
 	};
 
 	var draw = function(matrixData){
-		console.log('drawing ' + matrixData);
+		//console.log('drawing ' + matrixData);
 		var i;
 		for( i=0 ; i < numRows ; i++){
 			drawRow( i , matrixData[i]);
@@ -373,5 +375,5 @@ define('lss', ['jquery','underscore'], function($, _){
 		draw			: draw,
 		play			: play,
 		pause			: pause
-	}
+	};
 });
