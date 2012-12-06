@@ -54,8 +54,11 @@ define('lss', ['jquery','underscore'], function($, _){
 		UIelems.play = $('button#play');
 		UIelems.pause = $('button#pause');
 		UIelems.add = $('button#pushMatrixCode');
+		UIelems.contrast = $('input#highContrast');
 		UIelems.matrixCode = $('input#matrixCode');
 		UIelems.sequence = $('#sequence');
+
+		UIelems.shiftRight = $('button#shiftRight');
 	};
 
 	var updateMatrixcode = function(){
@@ -82,32 +85,52 @@ define('lss', ['jquery','underscore'], function($, _){
 	};
 
 
-	//get and cleanup sequence data
-	//@param selector: sizzle/css selector for sequence container
-	//       default: #sequence
-	var getSequenceFromHtml = function(selector){
+	/**
+	 * get and cleanup sequence data
+	 * @return Array matrixArray
+	 */
+	var getSequenceFromHtml = function(){
 		var sequence = UIelems.sequence.text();
 		var matrixArrayDirty = sequence.split("},");
-		matrixArrayDirty = _.filter(matrixArrayDirty,function(str){
-			return str.trim().length;//remove ""
-		});
-		var matrixArray = _.map(matrixArrayDirty, function(str){
-			var newStr = str.match(/[0-9].*$/)[0];
-			var ray = newStr.split(',');
-			return ray;
-		});
+		var matrixArray = _.chain(matrixArrayDirty)
+			.filter(function(str){
+				return str.trim().length;//remove ""
+			})
+			.map(function(str){
+				var newStr = str.match(/[0-9].*$/)[0];
+				var ray = newStr.split(',');
+				return ray;
+			})
+			.value();
 		return matrixArray;
-	};
-
-	//sequence: array of matrixCodes
-	var playThru = function(sequence){
-		playStack = sequence;
-		playIntervalID = window.setInterval(playNextState,playSpeed);
 	};
 
 	var play = function(){
 		var sequence = getSequenceFromHtml();
 		playThru(sequence);
+	};
+
+	/**
+	 * sets playStack and starts playback
+	 * @param sequence Array of matrixCodes
+	 */
+	var playThru = function(sequence){
+		playStack = sequence;
+		playIntervalID = window.setInterval(playNextState,playSpeed);
+	};
+
+	/**
+	 * shift next state off of playStack and play apply it to the board
+	 */
+	var playNextState = function(){
+		var nextState = playStack.shift();
+		if(typeof nextState !== 'undefined'){
+			draw(nextState);
+			$eventHolder.trigger('matrixChange.shield');
+		}else{
+			clearInterval(playIntervalID); //stop
+			playIntervalID = false;
+		}
 	};
 
 	var pause = function(){
@@ -118,17 +141,6 @@ define('lss', ['jquery','underscore'], function($, _){
 			playIntervalID = window.setInterval(playNextState,playSpeed);
 		}
 		console.log(playStack.length);
-	};
-
-	var playNextState = function(){
-		var nextState = playStack.shift();
-		if(typeof nextState !== 'undefined'){
-			draw(nextState);
-			$eventHolder.trigger('matrixChange.shield');
-		}else{
-			clearInterval(playIntervalID); //stop
-			playIntervalID = false;
-		}
 	};
 
 	//send 'on' or 'off' to go one direction, otherwise toggles
@@ -214,24 +226,29 @@ define('lss', ['jquery','underscore'], function($, _){
 		});
 
 		//update row when matrixCode changes
-		$('input#matrixCode').bind('change.shield', function(e){
-			var $that = $(this);
-			var matrixCode = $that.attr('value');
-			var matrixCodeArray = matrixCode.split(',');
-			if(matrixCodeArray.length !== numRows || !/^[0-9,]+$/.test(matrixCode)){ 
-				console.log('bad matrixCodeArray:(');
-				return false; //make sure the string is legit
-			}
+		UIelems.matrixCode.bind('change.shield', function(e){
+			var matrixCodeArray = getMatrixCode();
+			if(!matrixCodeArray){ return false; }
 			draw(matrixCodeArray);
 			$eventHolder.trigger('matrixChange.shield');
 		});
 	};
 
-	var initControls = function(){
-		var $controls = $('#controls');
-		var $hC = $controls.find('#highContrast');
+	/**
+	 * @return Array matrixCode
+	 */
+	var getMatrixCode = function(){
+		var matrixCode = UIelems.matrixCode.attr('value');
+		var matrixCodeArray = matrixCode.split(',');
+		if(matrixCodeArray.length !== numRows || !/^[0-9,]+$/.test(matrixCode)){ 
+			console.log('bad matrixCodeArray:(');
+			return false; //make sure the string is legit
+		}
+		return matrixCodeArray;
+	};
 
-		$hC.bind('change',function(e){
+	var initControls = function(){
+		UIelems.contrast.bind('change',function(e){
 			if($(this).is(':checked')){
 				$('body').addClass('highContrast');
 			}else{
@@ -248,8 +265,8 @@ define('lss', ['jquery','underscore'], function($, _){
 			console.log(sequence);
 		});
 
-		//playThru
-		UIelems.play.bind('click',function(){
+		//play
+		UIelems.play.bind('click',function(e){
 			UIelems.pause.attr('disabled',false);
 			play();
 		});
@@ -263,6 +280,17 @@ define('lss', ['jquery','underscore'], function($, _){
 			}
 			pause();
 		});
+
+		//shiftRight
+		UIelems.shiftRight.bind('click',function(e){
+			var matrixCodeArray = getMatrixCode();
+			matrixCodeArray = shiftRight(matrixCodeArray);
+			//draw to shield
+			if(!matrixCodeArray){ return false; }
+			draw(matrixCodeArray);
+			$eventHolder.trigger('matrixChange.shield');
+		});
+
 	};
 
 	var initLocalStorage = function(){
@@ -325,11 +353,6 @@ define('lss', ['jquery','underscore'], function($, _){
 		console.log(LScache);
 	};
 
-	//read from LS and load into sequence holder
-	var loadSequence = function(sequence){
-		$('#sequence').html(sequence);
-	};
-
 	var init = function(){
 		initMarkup();
 		initHandlers();
@@ -360,11 +383,30 @@ define('lss', ['jquery','underscore'], function($, _){
 	};
 
 	var draw = function(matrixData){
-		//console.log('drawing ' + matrixData);
+		//console.log('drawing ' + typeof matrixData);
 		var i;
 		for( i=0 ; i < numRows ; i++){
 			drawRow( i , matrixData[i]);
 		}
+	};
+
+	/**
+	 * move all leds right; wrap far right onto left
+	 * @param matrixData Array matrix of led values
+	 */
+	var shiftRight = function(matrixData){
+		//foreach matrix
+		var i;
+		var wrapBit = Math.pow(2,numColumns); //far right bit to go left
+		for( i=0 ; i < numRows ; i++){
+			//shift off one bit
+			matrixData[i] = matrixData[i] << 1;
+			//stick it on the other end
+			if(matrixData[i] & wrapBit){
+				matrixData[i] += 1 - wrapBit;
+			}
+		}
+		return matrixData;
 	};
 
 	return {
@@ -374,6 +416,8 @@ define('lss', ['jquery','underscore'], function($, _){
 		drawRow		: drawRow,
 		draw			: draw,
 		play			: play,
-		pause			: pause
+		pause			: pause,
+		
+		shiftRight: shiftRight
 	};
 });
