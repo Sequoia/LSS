@@ -59,6 +59,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		UIelems.sequence = $('#sequence');
 
 		UIelems.shiftRight = $('button#shiftRight');
+		UIelems.shiftLeft = $('button#shiftLeft');
 	};
 
 	var updateMatrixcode = function(){
@@ -290,6 +291,16 @@ define('lss', ['jquery','underscore'], function($, _){
 			draw(matrixCodeArray);
 			$eventHolder.trigger('matrixChange.shield');
 		});
+		
+		//shiftLeft
+		UIelems.shiftLeft.bind('click',function(e){
+			var matrixCodeArray = getMatrixCode();
+			matrixCodeArray = shiftLeft(matrixCodeArray);
+			//draw to shield
+			if(!matrixCodeArray){ return false; }
+			draw(matrixCodeArray);
+			$eventHolder.trigger('matrixChange.shield');
+		});
 
 	};
 
@@ -395,16 +406,38 @@ define('lss', ['jquery','underscore'], function($, _){
 	 * @param matrixData Array matrix of led values
 	 */
 	var shiftRight = function(matrixData){
-		//foreach matrix
 		var i;
-		var wrapBit = Math.pow(2,numColumns); //far right bit to go left
+		var wrapMask = Math.pow(2,numColumns); //far right bit to go left
 		for( i=0 ; i < numRows ; i++){
 			//shift off one bit
 			matrixData[i] = matrixData[i] << 1;
 			//stick it on the other end
-			if(matrixData[i] & wrapBit){
-				matrixData[i] += 1 - wrapBit;
+			if(matrixData[i] & wrapMask ){
+				matrixData[i] += 1 - wrapMask;
 			}
+		}
+		return matrixData;
+	};
+
+	/**
+	 * move all leds right; wrap far right onto left
+	 * @param matrixData Array matrix of led values
+	 */
+	var shiftLeft = function(matrixData){
+		var i;
+		var wrapMask = Math.pow(2,numColumns); //far right bit to go left
+		console.log(wrapMask);
+		for( i=0 ; i < numRows ; i++){
+		console.log("===");
+			console.log(matrixData[i]);
+			//does the first light on? if so add wrap bit to matrixData
+			if(matrixData[i] & 1){
+				matrixData[i] = parseInt(matrixData[i],10) + wrapMask;
+			console.log(matrixData[i]);
+			}
+			//shift off one bit
+			matrixData[i] = matrixData[i] >> 1;
+		console.log(matrixData[i]);
 		}
 		return matrixData;
 	};
@@ -418,6 +451,7 @@ define('lss', ['jquery','underscore'], function($, _){
 		play			: play,
 		pause			: pause,
 		
-		shiftRight: shiftRight
+		shiftRight: shiftRight,
+		shiftLeft: shiftLeft
 	};
 });
