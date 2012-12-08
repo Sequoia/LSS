@@ -1,3 +1,4 @@
+/*jshint devel:true */
 var lsss; //so I can access it from the console
 require.config({
 	paths : {
@@ -16,10 +17,10 @@ require(['jquery','underscore','Mousetrap','lss'],function($,_,Mousetrap,lss){
 		"use strict";
 		lsss=lss;
 		var $shield = lss.init();
-		var fileName = "writefile.php";
+		var serverPath = "writefile.php";
 
 		//check if the server is listening for shieldchange updates
-		$.ajax( fileName,
+		$.ajax( serverPath,
 		{
 			type: 'post',
 			data: {
@@ -37,7 +38,7 @@ require(['jquery','underscore','Mousetrap','lss'],function($,_,Mousetrap,lss){
 			console.log('info: sending data to server for writing to arduino');
 			$shield.bind('matrixChange.shield',_.debounce(function(){
 				console.log('sending to server...');
-				$.ajax( fileName,
+				$.ajax( serverPath,
 				{
 					type: 'post',
 					data: {

@@ -59,6 +59,9 @@ define('lss', ['jquery','underscore'], function($, _){
 		UIelems.sequence = $('#sequence');
 
 		UIelems.shiftRight = $('button#shiftRight');
+		UIelems.shiftLeft = $('button#shiftLeft');
+		UIelems.shiftUp = $('button#shiftUp');
+		UIelems.shiftDown = $('button#shiftDown');
 	};
 
 	var updateMatrixcode = function(){
@@ -98,7 +101,9 @@ define('lss', ['jquery','underscore'], function($, _){
 			})
 			.map(function(str){
 				var newStr = str.match(/[0-9].*$/)[0];
-				var ray = newStr.split(',');
+				var ray = _(newStr.split(',')).map(function(str){
+					return parseInt(str,10);
+				});
 				return ray;
 			})
 			.value();
@@ -239,7 +244,9 @@ define('lss', ['jquery','underscore'], function($, _){
 	 */
 	var getMatrixCode = function(){
 		var matrixCode = UIelems.matrixCode.attr('value');
-		var matrixCodeArray = matrixCode.split(',');
+		var matrixCodeArray = _(matrixCode.split(',')).map(function(str){
+			return parseInt(str,10);
+		});
 		if(matrixCodeArray.length !== numRows || !/^[0-9,]+$/.test(matrixCode)){ 
 			console.log('bad matrixCodeArray:(');
 			return false; //make sure the string is legit
@@ -290,7 +297,36 @@ define('lss', ['jquery','underscore'], function($, _){
 			draw(matrixCodeArray);
 			$eventHolder.trigger('matrixChange.shield');
 		});
+		
+		//shiftLeft
+		UIelems.shiftLeft.bind('click',function(e){
+			var matrixCodeArray = getMatrixCode();
+			matrixCodeArray = shiftLeft(matrixCodeArray);
+			//draw to shield
+			if(!matrixCodeArray){ return false; }
+			draw(matrixCodeArray);
+			$eventHolder.trigger('matrixChange.shield');
+		});
 
+		//shiftUp
+		UIelems.shiftUp.bind('click',function(e){
+			var matrixCodeArray = getMatrixCode();
+			matrixCodeArray = shiftUp(matrixCodeArray);
+			//draw to shield
+			if(!matrixCodeArray){ return false; }
+			draw(matrixCodeArray);
+			$eventHolder.trigger('matrixChange.shield');
+		});
+
+		//shiftDown
+		UIelems.shiftDown.bind('click',function(e){
+			var matrixCodeArray = getMatrixCode();
+			matrixCodeArray = shiftDown(matrixCodeArray);
+			//draw to shield
+			if(!matrixCodeArray){ return false; }
+			draw(matrixCodeArray);
+			$eventHolder.trigger('matrixChange.shield');
+		});
 	};
 
 	var initLocalStorage = function(){
@@ -392,22 +428,70 @@ define('lss', ['jquery','underscore'], function($, _){
 
 	/**
 	 * move all leds right; wrap far right onto left
-	 * @param matrixData Array matrix of led values
+	 * @param Array matrixData matrix of led values
+	 * @return Array matrixData matrix, shifted
 	 */
 	var shiftRight = function(matrixData){
-		//foreach matrix
 		var i;
-		var wrapBit = Math.pow(2,numColumns); //far right bit to go left
+		var wrapMask = Math.pow(2,numColumns); //far right bit to go left
 		for( i=0 ; i < numRows ; i++){
 			//shift off one bit
 			matrixData[i] = matrixData[i] << 1;
 			//stick it on the other end
-			if(matrixData[i] & wrapBit){
-				matrixData[i] += 1 - wrapBit;
+			if(matrixData[i] & wrapMask ){
+				matrixData[i] += 1 - wrapMask;
 			}
 		}
 		return matrixData;
 	};
+
+	/**
+	 * move all leds left; wrap far left onto right
+	 * @param Array matrixData matrix of led values
+	 * @return Array matrixData matrix, shifted
+ */
+	var shiftLeft = function(matrixData){
+		var i;
+		var wrapMask = Math.pow(2,numColumns); //far right bit to go left
+		console.log(wrapMask);
+		for( i=0 ; i < numRows ; i++){
+		console.log("===");
+			console.log(matrixData[i]);
+			//does the first light on? if so add wrap bit to matrixData
+			if(matrixData[i] & 1){
+				matrixData[i] = matrixData[i] + wrapMask;
+			console.log(matrixData[i]);
+			}
+			//shift off one bit
+			matrixData[i] = matrixData[i] >> 1;
+		console.log(matrixData[i]);
+		}
+		return matrixData;
+	};
+
+	/**
+	 * move all leds up; wrap top to bottom
+	 * @param Array matrixData
+	 * @param Array shifted matrixData
+	 */
+	var shiftUp = function(matrixData){
+		var topRow = matrixData.shift();
+		matrixData.push(topRow);
+		return matrixData;
+	};
+
+	/**
+	 * move all leds up; wrap top to bottom
+	 * @param Array matrixData
+	 * @param Array shifted matrixData
+	 */
+	var shiftDown = function(matrixData){
+		var bottomRow = matrixData.pop();
+		matrixData.unshift(bottomRow);
+		return matrixData;
+	};
+
+	//var shiftUp = function(matrixData
 
 	return {
 		init			: init,
@@ -418,6 +502,8 @@ define('lss', ['jquery','underscore'], function($, _){
 		play			: play,
 		pause			: pause,
 		
-		shiftRight: shiftRight
+		shiftRight: shiftRight,
+		shiftLeft: shiftLeft,
+		shiftUp: shiftUp
 	};
 });
