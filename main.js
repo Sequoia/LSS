@@ -1,17 +1,7 @@
 /*jshint devel:true */
 var lsss; //so I can access it from the console
-require.config({
-	paths : {
-		'Mousetrap' : 'jam/mousetrap/mousetrap'
-	},
-	shim : {
-		'Mousetrap' : {
-			exports : 'Mousetrap'
-		}
-	}
-});
 
-require(['jquery','underscore','Mousetrap','lss'],function($,_,Mousetrap,lss){
+require(['jquery','underscore','lss'],function($,_,lss){
 
 	$(function(){
 		"use strict";
